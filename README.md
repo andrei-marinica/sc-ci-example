@@ -1,4 +1,4 @@
-# Smart contract example wit CI
+# Smart contract example with CI
 
 Based on the `adder` smart contract.
 
