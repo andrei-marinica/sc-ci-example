@@ -12,12 +12,20 @@ pub trait Workshop {
 
     #[init]
     fn init(&self, initial_value: BigUint) {
+        self.set_initial(initial_value);
+    }
+
+    fn set_initial(&self, initial_value: BigUint) {
         self.sum().set(initial_value);
     }
 
     /// Add desired amount to the storage variable.
     #[endpoint]
     fn add(&self, value: BigUint) {
+        self.perform_add(value);
+    }
+
+    fn perform_add(&self, value: BigUint) {
         self.sum().update(|sum| *sum += value);
     }
 }

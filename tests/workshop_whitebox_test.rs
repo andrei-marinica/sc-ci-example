@@ -1,5 +1,5 @@
-use workshop::*;
 use multiversx_sc_scenario::{scenario_model::*, *};
+use workshop::*;
 
 const ADDER_PATH_EXPR: &str = "file:output/workshop.wasm";
 
@@ -27,7 +27,7 @@ fn adder_whitebox() {
             &adder_whitebox,
             ScDeployStep::new().from("address:owner").code(adder_code),
             |sc| {
-                sc.init(5u32.into());
+                sc.set_initial(5u32.into());
             },
         )
         .whitebox_query(&adder_whitebox, |sc| {
@@ -37,7 +37,7 @@ fn adder_whitebox() {
         .whitebox_call(
             &adder_whitebox,
             ScCallStep::new().from("address:owner"),
-            |sc| sc.add(3u32.into()),
+            |sc| sc.perform_add(3u32.into()),
         )
         .check_state_step(
             CheckStateStep::new()
