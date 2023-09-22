@@ -1,0 +1,16 @@
+[package]
+name = "workshop"
+version = "0.0.0"
+authors = ["Andrei Marinica <andrei.marinica@multiversx.com>"]
+edition = "2021"
+publish = false
+
+[lib]
+path = "src/workshop.rs"
+[dependencies.multiversx-sc]
+version = "0.43.4"
+[dev-dependencies.multiversx-sc-scenario]
+version = "0.43.4"
+
+[workspace]
+members = [".", "meta", "interact"]
