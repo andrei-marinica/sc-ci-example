@@ -1,14 +1,14 @@
-use workshop::*;
 use multiversx_sc::storage::mappers::SingleValue;
 use multiversx_sc_scenario::{api::StaticApi, num_bigint::BigUint, scenario_model::*, *};
+use workshop::*;
 
-const ADDER_PATH_EXPR: &str = "file:output/workshop.wasm";
+const CONTRACT_PATH_EXPR: &str = "file:../output/workshop.wasm";
 
 fn world() -> ScenarioWorld {
     let mut blockchain = ScenarioWorld::new();
     // blockchain.set_current_dir_from_workspace("relative path to your workspace, if applicable");
 
-    blockchain.register_contract("file:output/workshop.wasm", workshop::ContractBuilder);
+    blockchain.register_contract(CONTRACT_PATH_EXPR, workshop::ContractBuilder);
     blockchain
 }
 
@@ -17,7 +17,7 @@ fn adder_blackbox_with_values() {
     let mut world = world();
     let owner_address = "address:owner";
     let mut adder_contract = ContractInfo::<workshop::Proxy<StaticApi>>::new("sc:adder");
-    let adder_code = world.code_expression(ADDER_PATH_EXPR);
+    let adder_code = world.code_expression(CONTRACT_PATH_EXPR);
 
     world
         .start_trace()
@@ -55,5 +55,5 @@ fn adder_blackbox_with_values() {
                     CheckAccount::new().check_storage("str:sum", "8"),
                 ),
         )
-        .write_scenario_trace("trace1.scen.json");
+        .write_scenario_trace("scenarios/blackbox_trace.scen.json");
 }
