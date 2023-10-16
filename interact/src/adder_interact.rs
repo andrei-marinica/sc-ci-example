@@ -2,13 +2,15 @@ mod adder_interact_cli;
 mod adder_interact_config;
 mod adder_interact_state;
 
-use workshop::ProxyTrait;
 use adder_interact_config::Config;
 use adder_interact_state::State;
 use clap::Parser;
 use multiversx_sc_snippets::{
     env_logger,
-    multiversx_sc::{storage::mappers::SingleValue, types::Address},
+    multiversx_sc::{
+        storage::mappers::SingleValue,
+        types::{Address, ContractDeploy},
+    },
     multiversx_sc_scenario::{
         api::StaticApi,
         bech32,
@@ -23,6 +25,7 @@ use multiversx_sc_snippets::{
     },
     tokio, Interactor, StepBuffer,
 };
+use workshop::ProxyTrait;
 
 const INTERACTOR_SCENARIO_TRACE_PATH: &str = "interactor_trace.scen.json";
 
@@ -36,20 +39,26 @@ async fn main() {
     match &cli.command {
         Some(adder_interact_cli::InteractCliCommand::Add(args)) => {
             adder_interact.add(args.value).await;
-        },
+        }
         Some(adder_interact_cli::InteractCliCommand::Deploy) => {
             adder_interact.deploy().await;
-        },
+        }
+        Some(adder_interact_cli::InteractCliCommand::DeployEV) => {
+            adder_interact.deploy_ev().await;
+        }
         Some(adder_interact_cli::InteractCliCommand::Feed) => {
             adder_interact.feed_contract_egld().await;
-        },
+        }
         Some(adder_interact_cli::InteractCliCommand::MultiDeploy(args)) => {
             adder_interact.multi_deploy(&args.count).await;
-        },
+        }
         Some(adder_interact_cli::InteractCliCommand::Sum) => {
             adder_interact.print_sum().await;
-        },
-        None => {},
+        }
+        Some(adder_interact_cli::InteractCliCommand::SumSquared) => {
+            adder_interact.print_sum_squared().await;
+        }
+        None => {}
     }
 }
 
@@ -58,6 +67,7 @@ struct AdderInteract {
     interactor: Interactor,
     wallet_address: Address,
     adder_code: BytesValue,
+    adder_ev_code: BytesValue,
     state: State,
 }
 
@@ -68,14 +78,21 @@ impl AdderInteract {
             .await
             .with_tracer(INTERACTOR_SCENARIO_TRACE_PATH)
             .await;
-        let wallet_address = interactor.register_wallet(test_wallets::mike());
-        let adder_code =
-            BytesValue::interpret_from("file:../output/workshop.wasm", &InterpreterContext::default());
+        let wallet_address = interactor.register_wallet(test_wallets::grace());
+        let adder_code = BytesValue::interpret_from(
+            "file:../output/workshop.wasm",
+            &InterpreterContext::default(),
+        );
+        let adder_ev_code = BytesValue::interpret_from(
+            "file:../output/workshop-ev.wasm",
+            &InterpreterContext::default(),
+        );
 
         Self {
             interactor,
             wallet_address,
             adder_code,
+            adder_ev_code,
             state: State::load_state(),
         }
     }
@@ -117,6 +134,32 @@ impl AdderInteract {
 
                     let new_address_expr = format!("bech32:{new_address_bech32}");
                     self.state.set_adder_address(&new_address_expr);
+                },
+            )
+            .await;
+    }
+
+    async fn deploy_ev(&mut self) {
+        self.interactor
+            .sc_deploy_use_result(
+                ScDeployStep::new()
+                    .argument(self.state.adder_address.as_ref().unwrap().as_str())
+                    .call(ContractDeploy::<StaticApi, ()>::new())
+                    .from(&self.wallet_address)
+                    .code(&self.adder_ev_code),
+                |new_address, tr| {
+                    tr.result.unwrap_or_else(|err| {
+                        panic!(
+                            "deploy failed: status: {}, message: {}",
+                            err.status, err.message
+                        )
+                    });
+
+                    let new_address_bech32 = bech32::encode(&new_address);
+                    println!("new address: {new_address_bech32}");
+
+                    let new_address_expr = format!("bech32:{new_address_bech32}");
+                    self.state.set_adder_ev_address(&new_address_expr);
                 },
             )
             .await;
@@ -194,6 +237,18 @@ impl AdderInteract {
                 let sum: SingleValue<BigUint> = tr.result.unwrap();
                 println!("sum: {}", sum.into());
             })
+            .await;
+    }
+
+    async fn print_sum_squared(&mut self) {
+        self.interactor
+            .sc_query_use_result(
+                ScQueryStep::new().call(self.state.adder_ev().sum_squared()),
+                |tr| {
+                    let sum: BigUint = tr.result.unwrap();
+                    println!("sum squared: {}", sum);
+                },
+            )
             .await;
     }
 }

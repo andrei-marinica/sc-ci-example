@@ -16,12 +16,16 @@ pub enum InteractCliCommand {
     Add(AddArgs),
     #[command(name = "deploy", about = "Deploy contract")]
     Deploy,
+    #[command(name = "deploy-ev", about = "Deploy external view contract")]
+    DeployEV,
     #[command(name = "feed", about = "Feed contract EGLD")]
     Feed,
     #[command(name = "multi-deploy", about = "Multiple deploy contracts")]
     MultiDeploy(MultiDeployArgs),
     #[command(name = "sum", about = "Print sum")]
     Sum,
+    #[command(name = "sum-sq", about = "Print sum squared")]
+    SumSquared,
 }
 
 #[derive(Default, Clone, PartialEq, Eq, Debug, Args)]

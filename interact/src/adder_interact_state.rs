@@ -17,7 +17,8 @@ pub type AdderContract = ContractInfo<workshop::Proxy<StaticApi>>;
 /// Multisig Interact state
 #[derive(Debug, Default, Serialize, Deserialize)]
 pub struct State {
-    adder_address: Option<String>,
+    pub adder_address: Option<String>,
+    pub adder_ev_address: Option<String>,
 }
 
 impl State {
@@ -38,10 +39,23 @@ impl State {
         self.adder_address = Some(String::from(address));
     }
 
+    /// Sets the adder-ev address
+    pub fn set_adder_ev_address(&mut self, address: &str) {
+        self.adder_ev_address = Some(String::from(address));
+    }
+
     /// Returns the adder contract
     pub fn adder(&self) -> AdderContract {
         AdderContract::new(
             self.adder_address
+                .clone()
+                .expect("no known adder contract, deploy first"),
+        )
+    }
+
+    pub fn adder_ev(&self) -> AdderContract {
+        AdderContract::new(
+            self.adder_ev_address
                 .clone()
                 .expect("no known adder contract, deploy first"),
         )
