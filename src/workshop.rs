@@ -28,4 +28,12 @@ pub trait Workshop {
     fn perform_add(&self, value: BigUint) {
         self.sum().update(|sum| *sum += value);
     }
+
+    /// The sum, but squared. An expensive operation.
+    #[view]
+    #[label("ev")]
+    fn sum_squared(&self) -> BigUint {
+        let s = self.sum().get();
+        s.clone() * s
+    }
 }

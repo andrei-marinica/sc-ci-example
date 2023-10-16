@@ -5,9 +5,9 @@
 ////////////////////////////////////////////////////
 
 // Init:                                 1
-// Endpoints:                            2
+// Endpoints:                            1
 // Async Callback (empty):               1
-// Total number of exported functions:   4
+// Total number of exported functions:   3
 
 #![no_std]
 
@@ -18,12 +18,12 @@
 multiversx_sc_wasm_adapter::allocator!();
 multiversx_sc_wasm_adapter::panic_handler!();
 
-multiversx_sc_wasm_adapter::endpoints! {
+multiversx_sc_wasm_adapter::external_view_init! {}
+
+multiversx_sc_wasm_adapter::external_view_endpoints! {
     workshop
     (
-        init => init
-        getSum => sum
-        add => add
+        sum_squared => sum_squared
     )
 }
 
