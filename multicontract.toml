@@ -1,0 +1,11 @@
+[settings]
+main = "main"
+
+[contracts.main]
+name = "workshop"
+add-unlabelled = true
+
+[contracts.workshop-ev]
+add-labels = ["ev"]
+external-view = true
+
