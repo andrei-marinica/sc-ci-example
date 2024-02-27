@@ -2,7 +2,6 @@ mod adder_interact_cli;
 mod adder_interact_config;
 mod adder_interact_state;
 
-use workshop::ProxyTrait;
 use adder_interact_config::Config;
 use adder_interact_state::State;
 use clap::Parser;
@@ -23,6 +22,7 @@ use multiversx_sc_snippets::{
     },
     tokio, Interactor, StepBuffer,
 };
+use workshop::ProxyTrait;
 
 const INTERACTOR_SCENARIO_TRACE_PATH: &str = "interactor_trace.scen.json";
 
@@ -36,20 +36,20 @@ async fn main() {
     match &cli.command {
         Some(adder_interact_cli::InteractCliCommand::Add(args)) => {
             adder_interact.add(args.value).await;
-        },
+        }
         Some(adder_interact_cli::InteractCliCommand::Deploy) => {
             adder_interact.deploy().await;
-        },
+        }
         Some(adder_interact_cli::InteractCliCommand::Feed) => {
             adder_interact.feed_contract_egld().await;
-        },
+        }
         Some(adder_interact_cli::InteractCliCommand::MultiDeploy(args)) => {
             adder_interact.multi_deploy(&args.count).await;
-        },
+        }
         Some(adder_interact_cli::InteractCliCommand::Sum) => {
             adder_interact.print_sum().await;
-        },
-        None => {},
+        }
+        None => {}
     }
 }
 
@@ -69,8 +69,10 @@ impl AdderInteract {
             .with_tracer(INTERACTOR_SCENARIO_TRACE_PATH)
             .await;
         let wallet_address = interactor.register_wallet(test_wallets::mike());
-        let adder_code =
-            BytesValue::interpret_from("file:../output/workshop.wasm", &InterpreterContext::default());
+        let adder_code = BytesValue::interpret_from(
+            "file:../output/workshop.wasm",
+            &InterpreterContext::default(),
+        );
 
         Self {
             interactor,

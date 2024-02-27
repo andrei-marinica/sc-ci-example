@@ -1,6 +1,6 @@
-use workshop::*;
 use multiversx_sc::types::BigUint;
 use multiversx_sc_scenario::api::SingleTxApi;
+use workshop::*;
 
 #[test]
 fn adder_unit_test() {
