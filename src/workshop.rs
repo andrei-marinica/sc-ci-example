@@ -15,6 +15,11 @@ pub trait Workshop {
         self.set_initial(initial_value);
     }
 
+    #[upgrade]
+    fn upgrade(&self, initial_value: BigUint) {
+        self.init(initial_value);
+    }
+
     fn set_initial(&self, initial_value: BigUint) {
         self.sum().set(initial_value);
     }
